@@ -1,0 +1,772 @@
+#include <iostream>
+#include <string>
+#include <math.h>
+#include <fstream>
+#include <string>
+#ifndef BOOK_H 
+#ifndef LIBRARY_H 
+#ifndef USER_H
+#define BOOK_H
+#define LIBRARY_H 
+#define USER_H
+
+class Book
+{
+    private:
+        string author;
+        string title;
+    
+    public:
+        Book();
+        Book(string, string);
+        string getTitle();
+        string getAuthor();
+        string setTitle(string);
+        string setAuthor(string);
+};
+#endif
+
+Book::Book()
+{
+    author = "";
+    title = "";
+}
+Book::Book(string tName, string aName)
+{
+    author = aName;
+    title = tName;
+}
+string Book::getTitle()
+{
+    return title;
+}
+string Book::setTitle(string inputT)
+{
+    title = inputT;
+}
+string Book::getAuthor()
+{
+    return author;
+}
+string Book::setAuthor(string inputA)
+{
+    author = inputA;
+}
+
+class User
+{
+    public:
+        User();
+        User(string username, int numRatings[], int size);
+        string getUsername();
+        void setUsername(string);
+        int getRatingAt(int);
+        bool setRatingAt(int, int);
+        int getSize();
+        int getNumRatings();
+        void setNumRatings(int);
+    
+    private:
+        string username;
+        int ratings[50];
+        int numRatings;
+        int size;
+};
+#endif
+
+User::User() //default constructor
+{
+    username = ""; //setting username to empty string.
+    numRatings = 0;//setting numrate to 0.
+    size = 50; //size to 50.
+    bool trigger; //a bool.
+    for(int i = 0; i < size; i++) //for loop for ratings array.
+    {
+        ratings[i] = 0;
+    }
+}
+User::User(string user, int temp[], int numRate) //parameterized onstructor
+{
+    username = user;
+    numRatings = numRate;
+    size = 50;
+    for(int i = 0; i < numRate; i++) //for loop to loop over the ratings array.
+    {
+        ratings[i] = temp[i];
+    }
+    for (int i = numRate; i < size ; i++) //for loop 
+    {
+        ratings[i] = 0;
+    }
+}
+string User::getUsername() //getter for the username
+{
+    return username;
+}
+void User::setUsername(string user) //setter for the username
+{
+    username = user;
+}
+int User:: getRatingAt(int indx) //getter for the rating at.
+{
+    //return numRate;
+    if(indx >= size || indx < 0)
+    {
+        return -1;
+    }
+    return ratings[indx];
+}
+bool User:: setRatingAt(int indx, int value) //setter for the rating at.
+{
+    if(indx >= size || indx < 0 || value < 0 || value > 5)
+    {
+        return false;
+    }
+    else
+    {
+        ratings[indx] = value;
+        return true;
+    }
+}
+int User:: getNumRatings() //getter for the numRatings.
+{
+    return numRatings;
+}
+void User:: setNumRatings(int input) //setter for the numratings.
+{
+    numRatings = input;
+}
+int User:: getSize() //getter for the size, doesn't need a setter as it is a constant.
+{
+    return size;
+}
+
+class Library
+{
+    private:
+        const int sizeBook = 50;
+        const int sizeUser = 100;
+        Book books[50];
+        User users[100];
+        int numBooks;
+        int numUsers;
+        
+    public:
+        Library();
+        int getSizeBook();
+        int getSizeUser();
+        int getNumBooks();
+        int getNumUsers();
+        int readBooks(string);
+        void printAllBooks();
+        void printBooksByAuthor(string);
+        int readRatings(string);
+        int getRating(string, string);
+        int getCountReadBooks(string);
+        int viewRatings(string, int);
+        double calcAvgRating(string);
+        double calcAvgRatingByAuthor(string);
+        int addUser(string);
+        int checkOutBook(string, string, int);
+        void getRecommendations (string);
+};
+#endif
+
+int split(string a, char c, string arr[], int i)
+{
+    int count = 0;
+    string word;
+    if(a == "")
+    {
+        return 0;
+    }
+    else
+    {
+        a = a + c;
+        if(a[0] == c)
+        {
+            a = a.substr(1, a.length()-1);
+        }
+        for(int b = 0; b < a.length(); b++)
+        {
+            if(a[b] == c && a[b + 1] == c)
+            {
+                b++;
+            }
+            if(a[b] == c && word != "")
+            {
+                arr[count] = word;
+                count++;
+                word = "";
+            }
+            else
+            {
+                word = word + a[b];
+            }
+        }
+        if(count > i)
+        {
+            count = -1;
+        }
+        return count;
+    }
+} 
+ 
+string lower(string input)
+{
+    for(int x = 0; x < input.length(); x++)
+    {
+        input[x] = tolower(input[x]);
+    }
+    return input;
+}
+ 
+Library::Library()//default constructor
+{ 
+    numBooks = 0;
+    numUsers = 0;
+}
+int Library::getSizeBook()
+{
+    return sizeBook;
+}
+int Library::getSizeUser()
+{
+    return sizeUser;
+}
+int Library::getNumBooks()
+{
+    return numBooks;
+}
+int Library::getNumUsers()
+{
+    return numUsers;
+}
+
+int Library::readBooks(string filename)
+{ //this function will read the books file and populate arrays with titles and authors.
+    string tempArr[2];
+    string line = "";
+    ifstream myFile;
+    myFile.open(filename);
+    if(myFile.is_open()) //if number of books is less than the size...
+    {
+        while(getline(myFile, line) && getNumBooks() < getSizeBook()) //gets the line.
+        {
+            if(line != "") //if the line isn't blank and i is less than the size.
+            {
+                split(line, ',', tempArr, 2); //split the delimeter.
+                books[getNumBooks()].setTitle(tempArr[1]);
+                books[getNumBooks()].setAuthor(tempArr[0]);
+                numBooks++;
+            }
+        }
+        myFile.close();
+        if(getNumBooks() == getSizeBook())
+        {
+            return getNumBooks();
+        }
+        else if(getNumBooks() >= getSizeBook() || numBooks >= sizeBook)
+        {
+            return -2;
+        }
+        else
+        {
+            return numBooks;    
+        }
+    }
+    else if(myFile.fail()) //if the file cannot open, return -1.
+    {
+         return -1;
+    }
+}
+
+void Library::printAllBooks()
+{
+    if(getNumBooks() <= 0)
+    {
+        cout << "No books are stored" << endl; //if there are no books, the function will output that no books are stored.
+    }
+    else
+    {
+        cout << "Here is a list of books" << endl; //else, it will output the titles and authors of the given books.
+        for(int x = 0; x < getNumBooks(); x++)
+        {
+            cout << books[x].getTitle() << " by " << books[x].getAuthor() << endl;
+        }
+    }
+}
+
+void Library::printBooksByAuthor(string authorname)
+{
+    if(getNumBooks() <= 0)
+    {
+        cout << "No books are stored" << endl;
+    }
+    else
+    {
+        int i = 0;
+        int count = 0;
+        for(int x = 0; x < getNumBooks(); x++)
+        {
+            if(books[x].getAuthor() == authorname)
+            {
+                if(count == 0)
+                {
+                    cout << "Here is a list of books by " << authorname << endl;
+                }
+                cout << books[x].getTitle() << endl;
+                count++;
+            }
+        }
+        if(count == 0)
+        {
+            cout << "There are no books by " << authorname << endl;
+        }
+    }
+}
+            
+int Library::readRatings(string filename)
+{
+    ifstream myFile;
+    string line = "";
+    myFile.open(filename);
+    string tempArr[51];
+    int i = getNumUsers();
+    if(getNumUsers() >= getSizeUser()) //if numUsers is equal to the max amount of rows, return -2.
+    {
+        return -2;
+    }
+    if(myFile.fail()) //if the file won't open, return -1.
+    {
+        return -1;
+    }
+    else if(myFile.is_open())//if none of the above conditionals are met...
+    {
+       while(getline(myFile, line) && getNumUsers() < getSizeUser()) //get the line.
+        {
+            if(line != "") //if the line isn't blank.
+            {
+                split(line, ',', tempArr, 2);
+                users[i].setUsername(tempArr[0]);
+                for(int j = 1; j < sizeBook + 1; j++) //if columns is less than maxcolumns + 1, count.
+                {
+                    if(tempArr[j] != "") // if the lineisn't blank.
+                    {
+                        users[i].setRatingAt(j - 1, stoi(tempArr[j])); //the rows and columns + 1 is equal to the string array of j as an integer.
+                    }
+                }
+                i++;
+                numUsers++;
+            }
+        }
+        return numUsers;
+        myFile.close(); //close the file.
+    }
+}
+
+int Library::getRating(string username, string title)
+{
+    bool userSwap = false;
+    bool bookSwap = false;
+    int ratings = 0;
+    int userindx;
+    int bookindx;
+    
+    for(int x = 0; x < getNumUsers(); x++)
+    {
+        if(lower(users[x].getUsername()) == lower(username))
+        {
+            userindx = x;
+            userSwap = true;
+        }
+    }
+    for(int i = 0; i < getNumBooks(); i++)
+    {
+        if(lower(books[i].getTitle()) == lower(title))
+        {
+            bookindx = i;
+            bookSwap = true;
+        }
+    }
+    if(userSwap == false || bookSwap == false)
+    {
+        return -3;
+    }
+    ratings = users[userindx].getRatingAt(bookindx);
+    if(ratings == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        return ratings;
+    }
+}
+
+int Library::getCountReadBooks(string username)
+{
+    int count = 0;
+    int rating;
+    int userindx;
+    bool trigger = false;
+
+    for(int i = 0; i < getNumUsers(); i++)
+    {
+        if(lower(users[i].getUsername()) == lower(username))
+        {
+            userindx = i;
+            trigger = true;
+        
+        }
+        
+    }
+    if(trigger == false || getNumBooks() == 0)
+    {
+         return -3;
+    }
+    for(int j = 0; j < getNumBooks(); j++)
+    {
+        if(users[userindx].getRatingAt(j) != 0)
+        {
+            count++;
+        }
+    }
+    return count;
+}
+
+int Library::viewRatings(string username, int minVal)
+{
+    int userindx = 0;
+    bool userExistence = false;
+    bool ratingExistence = false;
+    for(int x = 0; x < getNumUsers(); x++)
+    {
+        if(lower(users[x].getUsername()) == lower(username))
+        {
+            userindx = x;
+            userExistence = false;
+        }
+    }
+    if(!userExistence)
+    {
+        cout << username << " does not exist." << endl;
+    }
+    else
+    {
+        for(int x = 0; x < sizeBook; x++)
+        {
+            if(users[userindx].getRatingAt(x) >= minVal)
+            {
+                if(!ratingExistence)
+                {
+                    cout << "Here are the books that " << username << " rated." << endl;
+                }
+                cout << "Title : " << books[x].getTitle() << endl;
+                cout << "Rating : " << users[userindx].getRatingAt(x) << endl;
+                cout << "_____" << endl;
+                ratingExistence = true;
+            }
+        }
+        if(!ratingExistence)
+        {
+            cout << username << " has not rated any books yet." << endl;
+        }
+    }
+}
+
+double Library::calcAvgRating(string title)
+{
+    int count = 0;
+    double rating;
+    int titleindx;
+    double ratingAvg = 0.0;
+    double ratingTot = 0.0;
+    bool titleExistence = false;
+    title = lower(title);
+    int x = 0;
+    for(int x = 0; x < numBooks; x++)
+    {
+        if(lower(title) == lower(books[x].getTitle()))
+        {
+            titleindx = x;
+            titleExistence = true;
+            break;
+        }
+    }
+    if(titleExistence == false || getNumBooks() == 0 || getNumUsers() == 0)
+    {
+        return -3;
+    }
+    for(int x = 0; x < getNumUsers(); x++)
+    {
+        rating = users[x].getRatingAt(titleindx);
+        if(rating != 0)
+        {
+            count++;
+            ratingTot = ratingTot + rating;
+        }
+    }
+    if(count == 0)
+    {
+        return 0;
+    }
+    ratingAvg = ratingTot / count;
+    return ratingAvg;
+}
+
+double Library::calcAvgRatingByAuthor(string author)
+{
+    int count = 0;
+    double rating;
+    int authorindx;
+    double ratingAvg = 0.0;
+    double ratingTot = 0.0;
+    bool authorExistence = false;
+    int x = 0;
+    for(int x = 0; x < getNumBooks(); x++)
+    {
+        if(lower(author) == lower(books[x].getAuthor()))
+        {
+            string titles = books[x].getTitle();
+            ratingTot = ratingTot + calcAvgRating(titles);
+            count++;
+        }
+    }
+    if(authorExistence == false || getNumBooks() == 0 || getNumUsers() == 0)
+    {
+        return -3;
+    }
+    ratingAvg = ratingTot / count;
+    return ratingAvg;
+}
+
+int Library::addUser(string username)
+{
+    int count = 0;
+    int rating;
+    int userindx;
+    bool swap = false;
+    for(int x = 0; x < getNumUsers(); x++)
+    {
+        if(lower(users[x].getUsername()) == lower(username))
+        {
+            userindx = x;
+            swap = true;
+        }
+    }
+    if(getNumUsers() == getSizeUser())
+    {
+        return -2;
+    }
+    else if(swap)
+    {
+        return 0;
+    }
+    else
+    {
+        users[getNumUsers()].setUsername(username);
+        if(username == users[getNumUsers()].getUsername())
+        {
+            numUsers++;
+            return 1;
+        }
+    }
+}
+
+int Library::checkOutBook(string username, string title, int update)
+{
+    bool userSwap = false;
+    bool bookSwap = false;
+    int userindx;
+    int bookindx;
+    for(int x = 0; x < getNumUsers(); x++)
+    {
+        if(lower(users[x].getUsername()) == lower(username))
+        {
+            userindx = x;
+            userSwap = true;
+        }
+    }
+    for(int x = 0; x < getNumBooks(); x++)
+    {
+        if(books[x].getTitle() == title)
+        {
+            bookindx = x;
+            bookSwap = true;
+        }
+    }
+    if(update < 0 || update > 5)
+    {
+        return -4;
+    }
+    else if(userSwap == false || bookSwap == false)
+    {
+        return -3;
+    }
+    users[userindx].setRatingAt(bookindx, update);
+    if(update == users[userindx].getRatingAt(bookindx))
+    {
+        return 1;
+    }
+}
+
+void Library::getRecommendations(string username)
+{
+    int userindx = -1;
+    int tempDif;
+    int totalDif;
+    int bestindx;
+    int bestDif = 999;
+    int ratindx;
+    int count = 0;
+    bool userSwap = false;
+    bool recSwap = false;
+    for(int x = 0; x < getNumUsers(); x++)
+    {
+        if(lower(users[x].getUsername()) == lower(username))
+        {
+            userindx = x;
+            userSwap = true;
+        }
+    }
+    if(!userSwap)
+    {
+        cout << username << " does not exist." << endl;
+    }
+    else
+    {
+        for(int x = 0; x < getNumUsers(); x++)
+        {
+            totalDif = 0;
+            tempDif = 0;
+            if(getCountReadBooks(users[x].getUsername()) == -3)
+            {
+                x++;
+            }
+            if(x == userindx)
+            {
+                x++;
+            }
+            for(int i = 0; i < getNumBooks(); i++)
+            {
+                tempDif = pow(users[userindx].getRatingAt(i) - users[x].getRatingAt(x), 2);
+                totalDif = totalDif + tempDif;
+            }
+            if(totalDif < bestDif)
+            {
+                bestDif = totalDif;
+                bestindx = x;
+            }
+        }
+        for(int x = 0; x < numBooks; x++)
+        {
+            if(users[userindx].getRatingAt(x) == 0 && users[bestindx].getRatingAt(x) >= 3)
+            {
+                recSwap = true;
+            }
+        }
+        if(!recSwap)
+        {
+            cout << "There are no recommendations for " << username << " at present." << endl;
+        }
+        else
+        {
+            recSwap = false;
+            while (count < 5 && ratindx < sizeBook)
+            {
+                if(users[userindx].getRatingAt(ratindx) == 0 && users[bestindx].getRatingAt(ratindx) >= 3 && users[bestindx].getRatingAt(ratindx) <= 3)
+                {
+                    if(!recSwap)
+                    {
+                        cout << "Here is a list of recommendations" << endl;
+                        recSwap = true;
+                    }
+                    cout << books[ratindx].getTitle() << " by " << books[ratindx].getAuthor() << endl;
+                    count++; 
+                }
+                ratindx++;
+            }
+        }
+    }
+}
+
+/*
+    bool userSwap = false;
+    string temp = "";
+    string user = "";
+    int userindx = 0;
+    user = lower(username);
+    temp = lower(users[x].getUsername());
+    for(int x = 0; x < getNumUsers(); x++)
+    {
+        if(temp = user)
+        {
+            userSwap = true;
+            userindx = x;
+        }
+    }
+    if(userSwap = false)
+    {
+        cout << username < " does not exist." << endl;
+    }
+    else
+    {
+        bool swap = false;
+        int finalDif = 1000000;
+        int userIndex = 0;
+        int match = 0;
+        for(int x = 0; x < getNumUsers(); x++)
+        {
+            int dif = 0;
+            for(int i = 0; i < getNumBooks(); i++)
+            {
+                dif = dif + pow((users[userindx].getRatingAt(i) - users[x].getRatingAt(i)), 2)
+            }
+            if(dif < finalDIF && x != userindx && dif != 0)
+            {
+                finalDif = dif;
+                match = x;
+            }
+        }
+        for(int x = 0; x < getNumBooks(); x++)
+        {
+            if(users[userindx].getRatingAt(x) == 0 && users[match].getRatingAt(x) >= 3)
+            {
+                swap = true;
+            }
+        }
+        if(swap = true)
+        {
+            int count = 0;
+            cout << "Here is the list of recommendations" << endl;
+            for(int x = 0; x < getNumBooks(); x++)
+            {
+                if(users[userindx].getRatingAt(x) == 0 && users[match].getRatingAt(x) >= 3 && count < 5 && users[match].getRatingAt(x) <= 5)
+                {
+                    cout << books[x].getTitle() << " by " << books[x].getAuthor() << endl;
+                }
+            }
+        }
+        else
+        {
+            cout << "There are no recommendations for " << username << " at present." << endl;
+        }
+    }
+}
+*/
+
+int main()
+{
+		
+//multiple txt files to library > 100 users
+Library l6 = Library();
+int check1 = l6.readRatings("ratings.txt");
+int check2 = l6.readRatings("ratings_first_half.txt");
+int check3 = l6.readRatings("ratings_second_half.txt");
+cout << "check1 = " << check1 << endl;
+cout << "check2 = " << check2 << endl;
+cout << "check3 = " << check3 << endl;
+cout << "numUsers = " << l6.getNumUsers() << endl;
+// 100+ users, no segfault
+}
